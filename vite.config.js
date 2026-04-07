@@ -1,0 +1,11 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite' // 1. Import it
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(), // 2. Add it here
+  ],
+  base: 'https://github.com/surbhi-145/study-tracker', // 3. Set the base path for GitHub Pages
+})
