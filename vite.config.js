@@ -7,5 +7,5 @@ export default defineConfig({
     react(),
     tailwindcss(), // 2. Add it here
   ],
-  base: 'https://github.com/surbhi-145/study-tracker', // 3. Set the base path for GitHub Pages
+  base: '/study-tracker', // 3. Set the base path for GitHub Pages
 })
