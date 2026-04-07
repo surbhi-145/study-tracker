@@ -164,23 +164,23 @@ const WEEKS = [
 ];
 
 const TRACK_COLORS = {
-    A: { 
-        bg: "bg-blue-50 dark:bg-blue-950", 
-        badge: "bg-blue-500", 
-        text: "text-blue-700 dark:text-blue-300", 
-        border: "border-blue-200 dark:border-blue-800" 
+    A: {
+        bg: "bg-blue-50 dark:bg-blue-950",
+        badge: "bg-blue-500",
+        text: "text-blue-700 dark:text-blue-300",
+        border: "border-blue-200 dark:border-blue-800"
     },
-    B: { 
-        bg: "bg-emerald-50 dark:bg-emerald-950", 
-        badge: "bg-emerald-500", 
-        text: "text-emerald-700 dark:text-emerald-300", 
-        border: "border-emerald-200 dark:border-emerald-800" 
+    B: {
+        bg: "bg-emerald-50 dark:bg-emerald-950",
+        badge: "bg-emerald-500",
+        text: "text-emerald-700 dark:text-emerald-300",
+        border: "border-emerald-200 dark:border-emerald-800"
     },
-    C: { 
-        bg: "bg-amber-50 dark:bg-amber-950", 
-        badge: "bg-amber-500", 
-        text: "text-amber-700 dark:text-amber-300", 
-        border: "border-amber-200 dark:border-amber-800" 
+    C: {
+        bg: "bg-amber-50 dark:bg-amber-950",
+        badge: "bg-amber-500",
+        text: "text-amber-700 dark:text-amber-300",
+        border: "border-amber-200 dark:border-amber-800"
     },
 };
 
@@ -253,24 +253,32 @@ function TrackCard({ week, track, data: trackData, storageData, onToggle, label 
         </div>
     );
 }
+// --- Main Application ---
 
 export default function StudyTracker() {
-    const { data, save, loaded } = useStorage();
+    const [data, setData] = useState({});
+    const [loaded, setLoaded] = useState(false);
     const [activeWeek, setActiveWeek] = useState(1);
     const [activeTab, setActiveTab] = useState("tasks");
 
-    const weekData = WEEKS[activeWeek - 1];
+    useEffect(() => {
+        const result = localStorage.getItem("tracker-state");
+        if (result) setData(JSON.parse(result));
+        setLoaded(true);
+    }, []);
 
-    function toggleItem(id) {
-        save({ ...data, [id]: !data[id] });
-    }
+    const save = (newData) => {
+        setData(newData);
+        localStorage.setItem("tracker-state", JSON.stringify(newData));
+    };
 
-    function getWeekProgress(weekNum) {
+    const toggleItem = (id) => save({ ...data, [id]: !data[id] });
+
+    const getWeekProgress = (weekNum) => {
         const w = WEEKS[weekNum - 1];
         const ids = [...w.trackA.tasks.map((_, i) => `w${weekNum}-tA-${i}`), ...w.trackB.tasks.map((_, i) => `w${weekNum}-tB-${i}`), ...w.trackC.tasks.map((_, i) => `w${weekNum}-tC-${i}`)];
-        if (!ids.length) return 0;
-        return Math.round((ids.filter(id => data[id]).length / ids.length) * 100);
-    }
+        return ids.length ? Math.round((ids.filter(id => data[id]).length / ids.length) * 100) : 0;
+    };
 
     const totalPct = (() => {
         let total = 0, done = 0;
@@ -281,24 +289,14 @@ export default function StudyTracker() {
         return total > 0 ? Math.round((done / total) * 100) : 0;
     })();
 
-    const exportJournal = () => {
-        const journalEntries = WEEKS.map(w => {
-            const entry = data[`w${w.week}-journal`];
-            return entry?.trim() ? `## Week ${w.week}: ${w.trackA.title}\n\n${entry}\n\n---` : null;
-        }).filter(Boolean).join("\n\n");
-        if (!journalEntries) return alert("Journals are empty!");
-        const blob = new Blob([`# Surbhi's Study Journal\n\n${journalEntries}`], { type: "text/markdown" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `surbhi-study-log.md`;
-        link.click();
-    };
+    const weekData = WEEKS[activeWeek - 1];
 
-    if (!loaded) return <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center text-gray-500 font-mono">BOOTING_SYSTEM...</div>;
+    if (!loaded) return <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center font-mono text-gray-400">LOADING_SRE_CORE...</div>;
 
     return (
         <div className="min-h-screen transition-colors duration-300 bg-white dark:bg-gray-950 text-gray-900 dark:text-white pb-24" style={{ fontFamily: "'DM Mono', monospace" }}>
             
+            {/* ADAPTIVE HEADER */}
             <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 px-4 py-4">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <div>
@@ -308,7 +306,7 @@ export default function StudyTracker() {
                     <div className="text-right">
                         <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase mb-1">{totalPct}% OVERALL</div>
                         <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
-                            <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${totalPct}%` }} />
+                            <div className="h-full bg-indigo-500" style={{ width: `${totalPct}%` }} />
                         </div>
                     </div>
                 </div>
@@ -316,17 +314,16 @@ export default function StudyTracker() {
 
             <div className="max-w-4xl mx-auto px-4 mt-6">
                 
+                {/* TIMELINE SELECTOR */}
                 <div className="mb-8">
                     <p className="text-[10px] text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] font-bold mb-3">Timeline</p>
                     <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
                         {WEEKS.map((w, i) => {
                             const isActive = activeWeek === i + 1;
-                            const isDone = getWeekProgress(i + 1) === 100;
+                            const progress = getWeekProgress(i + 1);
                             return (
-                                <button
-                                    key={i}
-                                    onClick={() => setActiveWeek(i + 1)}
-                                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center transition-all ${isActive ? "bg-indigo-600 text-white ring-2 ring-indigo-400 ring-offset-2 dark:ring-offset-gray-950" : isDone ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-900" : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"}`}
+                                <button key={i} onClick={() => { setActiveWeek(i + 1); if(activeTab === 'overview') setActiveTab('tasks'); }}
+                                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center transition-all ${isActive ? "bg-indigo-600 text-white ring-2 ring-indigo-400 ring-offset-2 dark:ring-offset-gray-950" : progress === 100 ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600" : "bg-gray-100 dark:bg-gray-900 text-gray-400 border border-gray-200 dark:border-gray-800"}`}
                                 >
                                     <span className="text-[10px] font-bold">W{i + 1}</span>
                                     {w.paper && <div className="w-1 h-1 bg-purple-500 rounded-full mt-1"></div>}
@@ -336,23 +333,33 @@ export default function StudyTracker() {
                     </div>
                 </div>
 
+                {/* WEEKLY METADATA (Restore System Design & Papers) */}
                 {activeTab !== "overview" && (
-                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="mb-6 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-end justify-between mb-2">
                             <h2 className="text-3xl font-black italic tracking-tighter">WEEK {activeWeek}</h2>
                             <span className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-bold">{getWeekProgress(activeWeek)}%</span>
                         </div>
-                        <div className="w-full h-2 bg-gray-100 dark:bg-gray-900 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-gray-100 dark:bg-gray-900 rounded-full overflow-hidden mb-4">
                             <div className="h-full bg-indigo-500 transition-all duration-700" style={{ width: `${getWeekProgress(activeWeek)}%` }} />
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                            {weekData.paper && (
+                                <a href={weekData.paper.url} target="_blank" rel="noreferrer" className="text-[9px] bg-purple-100 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full uppercase font-bold">📄 {weekData.paper.title}</a>
+                            )}
+                            {weekData.systemDesign && (
+                                <span className="text-[9px] bg-rose-100 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 px-3 py-1 rounded-full uppercase font-bold">🏗 {weekData.systemDesign}</span>
+                            )}
                         </div>
                     </div>
                 )}
 
+                {/* NAVIGATION */}
                 <nav className="flex gap-1 mb-8 border-b border-gray-200 dark:border-gray-900 overflow-x-auto no-scrollbar">
-                    {["tasks", "schedule", "journal"].map(tab => (
+                    {["tasks", "schedule", "journal", "overview"].map(tab => (
                         <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all border-b-2 -mb-px ${activeTab === tab ? "border-indigo-500 text-indigo-600 dark:text-white" : "border-transparent text-gray-400"}`}>{tab}</button>
                     ))}
-                    <button onClick={exportJournal} className="ml-auto px-4 py-3 text-[11px] font-black uppercase tracking-widest text-purple-500">Export</button>
                 </nav>
 
                 <main className="min-h-[400px]">
@@ -378,62 +385,37 @@ export default function StudyTracker() {
                     )}
 
                     {activeTab === "journal" && (
-    <div className="space-y-4 animate-in fade-in duration-500">
-        <div className="flex items-center justify-between px-1">
-            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Log Mode</p>
-            <div className="flex gap-2">
-                {['terminal', 'feynman'].map(mode => (
-                    <button 
-                        key={mode}
-                        onClick={() => save({ ...data, journalMode: mode })}
-                        className={`text-[9px] uppercase px-2 py-1 rounded border transition-all ${
-                            (data.journalMode || 'terminal') === mode 
-                            ? "bg-indigo-600 border-indigo-500 text-white" 
-                            : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400"
-                        }`}
-                    >
-                        {mode}
-                    </button>
-                ))}
-            </div>
-        </div>
+                        <div className="space-y-4">
+                            <div className="flex gap-2">
+                                {['terminal', 'feynman'].map(mode => (
+                                    <button key={mode} onClick={() => save({ ...data, journalMode: mode })} className={`text-[9px] uppercase px-2 py-1 rounded border ${(data.journalMode || 'terminal') === mode ? "bg-indigo-600 border-indigo-500 text-white" : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400"}`}>{mode}</button>
+                                ))}
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 relative">
+                                <div className="absolute top-3 left-6 text-[10px] font-bold text-indigo-500/50 uppercase font-mono">
+                                    {data.journalMode === 'feynman' ? `feynman_engine --explain --w${activeWeek}` : `surbhi@terminal:~/w${activeWeek}$ log.sh`}
+                                </div>
+                                <textarea value={data[`w${activeWeek}-journal`] || ""} onChange={(e) => save({ ...data, [`w${activeWeek}-journal`]: e.target.value })}
+                                    className="w-full h-80 bg-transparent text-gray-900 dark:text-white outline-none resize-none pt-8 font-mono text-sm leading-relaxed"
+                                    placeholder={data.journalMode === 'feynman' ? "Teach the concept..." : "Log technical findings..."}
+                                />
+                            </div>
+                        </div>
+                    )}
 
-        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 relative transition-all">
-            {/* Contextual Header */}
-            <div className="absolute top-3 left-6 text-[10px] font-bold text-indigo-500/50 uppercase tracking-widest font-mono">
-                {data.journalMode === 'feynman' 
-                    ? `feynman_engine --explain --week=${activeWeek}`
-                    : `surbhi@terminal:~/week-${activeWeek}$ log_entry.sh`
-                }
-            </div>
-            
-            <textarea
-                value={data[`w${activeWeek}-journal`] || ""}
-                onChange={(e) => save({ ...data, [`w${activeWeek}-journal`]: e.target.value })}
-                className="w-full h-80 bg-transparent text-gray-900 dark:text-white outline-none resize-none pt-8 font-mono text-sm leading-relaxed"
-                placeholder={
-                    data.journalMode === 'feynman'
-                    ? "Explain this week's core concept as if you're teaching a Junior SRE. Identify the gaps in your own understanding as you write..."
-                    : (activeWeek <= 4 ? ">> LOG: BGP/OSPF convergence issues or RFC notes..." :
-                       activeWeek <= 8 ? ">> LOG: Linux kernel hooks, eBPF XDP counter results..." :
-                       ">> LOG: System architecture trade-offs and bottleneck analysis...")
-                }
-            />
-        </div>
-        
-        <div className="flex justify-between items-center px-2">
-            <span className="text-[9px] text-gray-400 font-mono italic">
-                * {data.journalMode === 'feynman' ? "Focus on clarity and mental models." : "Focus on technical specs and commands."}
-            </span>
-            <button 
-                onClick={exportJournal}
-                className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-            >
-                GENERATE_MD_BACKUP
-            </button>
-        </div>
-    </div>
-)}
+                    {activeTab === "overview" && (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {WEEKS.map((w, i) => (
+                                <div key={i} className="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-800">
+                                    <div className="text-[10px] font-bold text-gray-400 mb-1">WEEK {i+1}</div>
+                                    <div className="text-xs font-bold truncate mb-2">{w.trackA.title}</div>
+                                    <div className="w-full h-1 bg-gray-200 dark:bg-gray-800 rounded-full">
+                                        <div className="h-full bg-indigo-500 transition-all duration-500" style={{ width: `${getWeekProgress(i+1)}%` }} />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </main>
             </div>
         </div>
