@@ -1,166 +1,300 @@
 import { useState, useEffect } from "react";
 
 const WEEKS = [
-    {
-        week: 1,
-        trackA: { title: "BGP Internals & State Machines", tasks: ["Study BGP path selection & attributes", "Read BGP RFC 4271", "Study iBGP vs eBGP"] },
-        trackB: { title: "Arrays & Hashing (LPM Foundations)", tasks: ["LC: Two Sum", "LC: Top K Frequent Elements", "LC: Group Anagrams"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Implement a BGP Best Path Selection engine in Go/Python"] },
-        paper: null,
-        systemDesign: "Intro: Reliability & Scalability",
-        blog: false,
-        hours: { sat: "Track A study (6h)", sun: "Stretch Goal: Path Selection Engine (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD Intro (2h)", fri: "Review (2h)" }
+  {
+    week: 1,
+    phase: "I: The Plumbing",
+    trackA: { 
+      title: "BGP FSM & Linux File Descriptors", 
+      tasks: [
+        "BGP Finite State Machine (RFC 4271)", 
+        "Linux: 'Everything is a File' - Study File Descriptors (FD) & Inodes", 
+        "Relationship between Sockets and the FD Table"
+      ] 
     },
-    {
-        week: 2,
-        trackA: { title: "OSPF & Graph Theory", tasks: ["Study OSPF LSA types", "Dijkstra's Algorithm in SPF", "GNS3: OSPF lab"] },
-        trackB: { title: "Two Pointers (Packet Parsing)", tasks: ["LC: Valid Palindrome", "LC: 3Sum", "LC: Container With Most Water"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Write a Dijkstra-based SPF solver for a mock network graph"] },
-        paper: null,
-        systemDesign: "Design a URL shortener",
-        blog: false,
-        hours: { sat: "Track A study (6h)", sun: "Stretch Goal: SPF Solver (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Arrays & Hashing", tasks: ["LC: Two Sum", "LC: Top K Frequent Elements"] },
+    trackC: { 
+      title: "BGP Attribute Evaluator", 
+      tasks: ["Project: Build a path selection engine", "Refactor/Depth: Go Interfaces & Error Handling patterns"] 
     },
-    {
-        week: 3,
-        trackA: { title: "VXLAN, EVPN & Overlay Networks", tasks: ["Study VXLAN frame format", "MP-BGP EVPN Control Plane", "Underlay vs Overlay routing"] },
-        trackB: { title: "Sliding Window", tasks: ["LC: Longest Substring Without Repeating Characters", "LC: Minimum Window Substring"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Write a Python script to build/parse a VXLAN header using Scapy"] },
-        paper: null,
-        systemDesign: "Design a Multi-tenant Cloud Network",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Header Parser (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "Scalability: Stateful vs. Stateless Networking",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Go Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 2,
+    phase: "I: The Plumbing",
+    trackA: { 
+      title: "OSPF & The Linux Routing Table", 
+      tasks: [
+        "Dijkstra's SPF Math", 
+        "Linux: How `ip route` interacts with the FIB (Forwarding Info Base)", 
+        "Understanding Routing Policy Databases (RPDB)"
+      ] 
     },
-    {
-        week: 4,
-        trackA: { title: "Python/Go: Concurrency & Sockets", tasks: ["Study asyncio/goroutines", "TCP/UDP socket programming", "NAPALM/Scapy basics"] },
-        trackB: { title: "Linked Lists & Binary Search", tasks: ["LC: Reverse Linked List", "LC: Binary Search"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Build a 'Turbo' SNMP Poller using a Worker Pool to poll 1k IPs"] },
-        paper: null,
-        systemDesign: "Design a load balancer",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Concurrent Poller (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Two Pointers", tasks: ["LC: 3Sum", "LC: Container With Most Water"] },
+    trackC: { 
+      title: "SPF Path Solver", 
+      tasks: ["Project: Dijkstra solver for mock graphs", "Refactor/Depth: Python Type Hinting & Pydantic for Network Models"] 
     },
-    {
-        week: 5,
-        trackA: { title: "HTTP/3, QUIC & DNS Internals", tasks: ["QUIC stream multiplexing", "DNS Record types & Anycast", "TLS 1.3 Handshake"] },
-        trackB: { title: "Stack & Queue Logic", tasks: ["LC: Valid Parentheses", "LC: Min Stack", "LC: Implement Queue using Stacks"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Build a Go Load Balancer with Round Robin & Health Checks"] },
-        paper: { title: "Google B4: BGP/SDN", url: "https://research.google/pubs/b4-experience-with-a-globally-deployed-software-defined-wan/" },
-        systemDesign: "Design a Global Load Balancer (GSLB)",
-        blog: true,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Go Load Balancer (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "Availability: Designing for Fault Domains",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Python Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 3,
+    phase: "I: The Plumbing",
+    trackA: { 
+      title: "Encapsulation & MTU/MSS", 
+      tasks: [
+        "VXLAN/EVPN Headers", 
+        "Linux: The Network Stack Path (From NIC to User-space)", 
+        "MTU path discovery and fragmentation issues"
+      ] 
     },
-    {
-        week: 6,
-        trackA: { title: "Kubernetes Networking & CNI", tasks: ["iptables vs IPVS", "CNI Plugin Architecture", "CoreDNS internals"] },
-        trackB: { title: "Trees Deep Dive", tasks: ["LC: Invert Binary Tree", "LC: Maximum Depth of Binary Tree"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Write a custom K8s Controller in Go to watch pods and sync state"] },
-        paper: null,
-        systemDesign: "Design a Service Mesh Control Plane",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: K8s Controller (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Sliding Window", tasks: ["LC: Longest Substring Without Repeating Characters"] },
+    trackC: { 
+      title: "VXLAN Packet Builder", 
+      tasks: ["Project: Build/Parse VXLAN with Scapy", "Refactor/Depth: Go Concurrency - Channels vs WaitGroups"] 
     },
-    {
-        week: 7,
-        trackA: { title: "Linux Networking & eBPF Intro", tasks: ["Namespaces, veth, & tc", "Intro to eBPF hooks", "Netfilter architecture"] },
-        trackB: { title: "Graphs: BFS & DFS", tasks: ["LC: Number of Islands", "LC: Network Delay Time"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Write a C/Go XDP program to count packets by protocol (TCP/UDP)"] },
-        paper: null,
-        systemDesign: "Design a distributed cache",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: XDP Packet Counter (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "Multi-tenancy: Virtual Routing & Forwarding (VRF)",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Go Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 4,
+    phase: "I: The Plumbing",
+    trackA: { 
+      title: "TCP Internals & Syscalls", 
+      tasks: [
+        "TCP Congestion Control (Cubic vs BBR)", 
+        "Linux: Syscalls - read(), write(), select(), epoll()", 
+        "Socket Buffer (sk_buff) architecture"
+      ] 
     },
-    {
-        week: 8,
-        trackA: { title: "High-Perf Linux & Kernel Bypass", tasks: ["Study DPDK/AF_XDP basics", "Interrupt Moderation vs Polling", "Zero-copy memory mapping"] },
-        trackB: { title: "Heap & Priority Queues", tasks: ["LC: Kth Largest Element", "LC: Find Median from Data Stream"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Implement a Lock-Free Ring Buffer for packet processing"] },
-        paper: { title: "The Maglev Paper", url: "https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/44824.pdf" },
-        systemDesign: "Design a 100Gbps Packet Gateway",
-        blog: true,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Ring Buffer (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Linked Lists & Binary Search", tasks: ["LC: Reverse Linked List", "LC: Binary Search Variants"] },
+    trackC: { 
+      title: "Concurrent Poller", 
+      tasks: ["Project: Worker-pool SNMP/gNMI poller", "Refactor/Depth: Python Asyncio - Event Loop & Tasks"] 
     },
-    {
-        week: 9,
-        trackA: { title: "Distributed Systems & Consensus", tasks: ["CAP Theorem deep-dive", "Read Raft Paper", "Strong vs Eventual Consistency"] },
-        trackB: { title: "Tries & Bit Manipulation", tasks: ["LC: Implement Trie", "LC: Number of 1 Bits"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Implement a Longest Prefix Match (LPM) algorithm using a Trie"] },
-        paper: { title: "Raft Consensus", url: "https://raft.github.io/raft.pdf" },
-        systemDesign: "Design a Key-Value Store",
-        blog: true,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: LPM Trie (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "Load Balancing: Consistent Hashing Algorithms",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Python Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 5,
+    phase: "II: The Performance",
+    trackA: { 
+      title: "DNS & Linux Resolver Internals", 
+      tasks: [
+        "QUIC & HTTP/3 multiplexing", 
+        "Linux: `/etc/resolv.conf`, nsswitch, and systemd-resolved", 
+        "EDNS and Anycast routing for DNS"
+      ] 
     },
-    {
-        week: 10,
-        trackA: { title: "Storage Engines & Data Layout", tasks: ["LSM-Trees vs B-Trees", "Columnar Storage basics", "Write-Ahead Logs (WAL)"] },
-        trackB: { title: "Graphs: Advanced", tasks: ["LC: Course Schedule", "LC: Alien Dictionary"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Implement a simple KV store that persists to disk using a WAL"] },
-        paper: null,
-        systemDesign: "Design a Time-Series Database (TSDB)",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: WAL Implementation (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Stacks & Queues", tasks: ["LC: Valid Parentheses", "LC: Min Stack"] },
+    trackC: { 
+      title: "Go Load Balancer", 
+      tasks: ["Project: Build L4 LB with Health Checks", "Refactor/Depth: Nix Foundations - Reproducible Dev Shells"] 
     },
-    {
-        week: 11,
-        trackA: { title: "Inventory & State Consistency", tasks: ["Data Modeling for SoT", "Concurrency in DB writes", "Optimistic vs Pessimistic locking"] },
-        trackB: { title: "Intervals & Mixed LC", tasks: ["LC: Merge Intervals", "LC: Meeting Rooms II"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Build a state reconciliation engine with exponential backoff"] },
-        paper: null,
-        systemDesign: "Design a Network Inventory SoT",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Sync Engine (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "DNS Design: Global Traffic Management (GTM)",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Nix Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 6,
+    phase: "II: The Performance",
+    trackA: { 
+      title: "K8s Data Plane & iptables", 
+      tasks: [
+        "kube-proxy: iptables vs IPVS vs eBPF", 
+        "Linux: Netfilter architecture & hook points", 
+        "Conntrack table management and bottlenecks"
+      ] 
     },
-    {
-        week: 12,
-        trackA: { title: "IaaC Internals & DAGs", tasks: ["Resource Graph execution", "State locking mechanisms", "Idempotency in API design"] },
-        trackB: { title: "Backtracking", tasks: ["LC: Subsets", "LC: Combination Sum"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Write a custom Terraform Provider for a mock API"] },
-        paper: null,
-        systemDesign: "Design a Global Deployment System (CI/CD)",
-        blog: true,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: TF Provider (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Trees", tasks: ["LC: Invert Binary Tree", "LC: Level Order Traversal"] },
+    trackC: { 
+      title: "K8s Controller", 
+      tasks: ["Project: Go controller to sync Pod state", "Refactor/Depth: Go Memory - Pointers vs Values & Escape Analysis"] 
     },
-    {
-        week: 13,
-        trackA: { title: "Observability & Telemetry", tasks: ["gRPC vs REST", "Prometheus Pull vs Push", "SNMP vs gNMI"] },
-        trackB: { title: "Hard Problems", tasks: ["LC: Trapping Rain Water"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Build a gRPC streaming telemetry collector in Go"] },
-        paper: { title: "Monarch Paper", url: "https://research.google/pubs/monarch-googles-planet-scale-in-memory-time-series-database/" },
-        systemDesign: "Design an Alerting System",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: gRPC Collector (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "Service Mesh: Envoy Data Plane & Control Plane",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Go Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 7,
+    phase: "II: The Performance",
+    trackA: { 
+      title: "Linux Virtual Networking & namespaces", 
+      tasks: [
+        "Network Namespaces, veth pairs, & Bridges", 
+        "Linux: The Virtual File System (VFS) & Mount Namespaces", 
+        "Understanding `chroot` vs `unshare`"
+      ] 
     },
-    {
-        week: 14,
-        trackA: { title: "Security & Policy Engines", tasks: ["Zero Trust Architecture", "OPA (Open Policy Agent) basics", "mTLS at Scale"] },
-        trackB: { title: "Dynamic Programming", tasks: ["LC: Climbing Stairs", "LC: Longest Increasing Subsequence"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Build a Policy Engine that validates if a config follows security rules"] },
-        paper: null,
-        systemDesign: "Design a Distributed Firewall",
-        blog: false,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Policy Engine (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    trackB: { title: "Graphs (BFS/DFS)", tasks: ["LC: Number of Islands", "LC: Network Delay Time"] },
+    trackC: { 
+      title: "eBPF Tracer", 
+      tasks: ["Project: XDP packet counter in C/Go", "Refactor/Depth: Python Context Managers & Decorators"] 
     },
-    {
-        week: 15,
-        trackA: { title: "Chaos Engineering", tasks: ["Blast Radius Analysis", "FMEA", "Simulating Latency/Loss"] },
-        trackB: { title: "Greedy Algorithms", tasks: ["LC: Maximum Subarray", "LC: Jump Game"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Build a 'Chaos Script' that randomly drops traffic on a Linux bridge"] },
-        paper: null,
-        systemDesign: "Design for Disaster Recovery",
-        blog: true,
-        hours: { sat: "Track A (6h)", sun: "Stretch Goal: Chaos Tool (6h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "Review (2h)" }
+    systemDesign: "Distributed Caching: Invalidation & Thundering Herd",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Python Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 8,
+    phase: "II: The Performance",
+    trackA: { 
+      title: "Kernel Bypass & Hardware Access", 
+      tasks: [
+        "DPDK/AF_XDP and Zero-Copy memory", 
+        "Linux: Page Cache, HugePages, and Memory Mapping (mmap)", 
+        "CPU Pinning & NUMA awareness for network dev"
+      ] 
     },
-    {
-        week: 16,
-        trackA: { title: "Final Readiness", tasks: ["Review Journals", "Mock System Design interview", "Network Dev trivia"] },
-        trackB: { title: "Final Review", tasks: ["Re-solve 10 'High-Impact' LC Mediums"] },
-        trackC: { title: "Dev Stretch Goal", tasks: ["Polish Portfolio: READMEs for all stretch goals"] },
-        paper: null,
-        systemDesign: "Capstone: High-Performance Data Highway",
-        blog: true,
-        hours: { sat: "Final Review (8h)", sun: "Portfolio Polish (8h)", mon: "Track B (3h)", tue: "Track C (2h)", wed: "Track C (2h)", thu: "SD (2h)", fri: "GO TIME (0h)" }
-    }
+    trackB: { title: "Heap & Priority Queues", tasks: ["LC: Kth Largest Element"] },
+    trackC: { 
+      title: "Lock-Free Ring Buffer", 
+      tasks: ["Project: Implement circular buffer in C/Go", "Refactor/Depth: Nix Flakes - Managing Cross-Language Deps"] 
+    },
+    systemDesign: "Design a 100Gbps Packet Gateway",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Nix Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 9,
+    phase: "III: The State",
+    trackA: { 
+      title: "Distributed Consensus & IPC", 
+      tasks: [
+        "Raft Algorithm: Leader Election & Log Replication", 
+        "Linux: Inter-Process Communication (IPC) - Pipes, Shm, Unix Sockets", 
+        "Atomic Operations & Semaphores"
+      ] 
+    },
+    trackB: { title: "Tries & Bit Manipulation", tasks: ["LC: Implement Trie", "LC: Number of 1 Bits"] },
+    trackC: { 
+      title: "LPM Trie", 
+      tasks: ["Project: Implement IP Prefix matching engine", "Refactor/Depth: Go Generics & Custom Data Structures"] 
+    },
+    systemDesign: "Design a Distributed Key-Value Store",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Go Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 10,
+    phase: "III: The State",
+    trackA: { 
+      title: "Storage Engines & Memory Management", 
+      tasks: [
+        "LSM-Trees vs B-Trees", 
+        "Linux: Process Memory Layout (Stack, Heap, Data, Text)", 
+        "Copy-on-Write (COW) and Forking behavior"
+      ] 
+    },
+    trackB: { title: "Advanced Graphs", tasks: ["LC: Course Schedule", "LC: Alien Dictionary"] },
+    trackC: { 
+      title: "WAL Persistence", 
+      tasks: ["Project: Build a crash-safe KV store with WAL", "Refactor/Depth: Python Memory Profiling - Garbage Collection & __slots__"] 
+    },
+    systemDesign: "Design a Time-Series Database (TSDB)",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Python Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 11,
+    phase: "III: The State",
+    trackA: { 
+      title: "Consistency & Locking Models", 
+      tasks: [
+        "Optimistic vs Pessimistic Locking in DBs", 
+        "Linux: Mutexes, Futexes, and Spinlocks", 
+        "Deadlock detection and prevention in systems"
+      ] 
+    },
+    trackB: { title: "Intervals", tasks: ["LC: Merge Intervals"] },
+    trackC: { 
+      title: "Reconciliation Engine", 
+      tasks: ["Project: Build state sync with backoff logic", "Refactor/Depth: Nix - Packaging custom Go/Python binaries"] 
+    },
+    systemDesign: "Design a Global Network Inventory (SoT)",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Nix Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 12,
+    phase: "III: The State",
+    trackA: { 
+      title: "IaaC Graph Theory & Processes", 
+      tasks: [
+        "Terraform DAG & State Sharding", 
+        "Linux: Process Lifecycle - PIDs, TIDs, Zombies, and Orphans", 
+        "The `init` process and Signal handling"
+      ] 
+    },
+    trackB: { title: "Backtracking", tasks: ["LC: Subsets", "LC: Combination Sum"] },
+    trackC: { 
+      title: "Custom TF Provider", 
+      tasks: ["Project: Write a TF provider for a mock API", "Refactor/Depth: Go Struct Tags & Reflection"] 
+    },
+    systemDesign: "Design a Global Deployment System (CI/CD)",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Go Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 13,
+    phase: "IV: The Platform",
+    trackA: { 
+      title: "Telemetry & Performance Profiling", 
+      tasks: [
+        "gRPC Bidirectional Streaming", 
+        "Linux: Performance analysis with `perf`, `strace`, and `lsof`", 
+        "Observing CPU context switches and IRQ balance"
+      ] 
+    },
+    trackB: { title: "Hard Problems", tasks: ["LC: Trapping Rain Water"] },
+    trackC: { 
+      title: "gRPC Collector", 
+      tasks: ["Project: Build a streaming Go collector", "Refactor/Depth: Python Metaprogramming & Type Classes"] 
+    },
+    systemDesign: "Design an Observability Platform (Metrics/Logs)",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Python Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 14,
+    phase: "IV: The Platform",
+    trackA: { 
+      title: "Security & Container Isolation", 
+      tasks: [
+        "Zero Trust Architecture & mTLS", 
+        "Linux: cgroups (Control Groups) & Resource Limits", 
+        "Capabilities & Seccomp profiles for network tools"
+      ] 
+    },
+    trackB: { title: "Dynamic Programming", tasks: ["LC: Climbing Stairs", "LC: Longest Increasing Subsequence"] },
+    trackC: { 
+      title: "Policy Engine", 
+      tasks: ["Project: Build a config validator", "Refactor/Depth: Go Plugin System & Shared Objects"] 
+    },
+    systemDesign: "Design a Multi-Region Distributed Firewall",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Go Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 15,
+    phase: "IV: The Platform",
+    trackA: { 
+      title: "Chaos Engineering & OS Stability", 
+      tasks: [
+        "Blast Radius & FMEA", 
+        "Linux: Understanding OOM Killer and Swap behavior", 
+        "Kernel Panic analysis & Core Dumps"
+      ] 
+    },
+    trackB: { title: "DP Continued", tasks: ["LC: Edit Distance"] },
+    trackC: { 
+      title: "Chaos Tool", 
+      tasks: ["Project: Tool to inject latency into Linux interfaces", "Refactor/Depth: Nix - Setting up a full OS config (NixOS basics)"] 
+    },
+    systemDesign: "Design for Disaster Recovery",
+    hours: { sat: "Network + Linux (6h)", sun: "Project (6h)", mon: "DSA (3h)", tue: "DSA (2h)", wed: "SD (2h)", thu: "Refactor + Nix Depth (2h)", fri: "Recall (1.5h)" }
+  },
+  {
+    week: 16,
+    phase: "IV: The Platform",
+    trackA: { title: "Final Readiness", tasks: ["Review Journals", "Mock Systems Design", "Trivia"] },
+    trackB: { title: "Review", tasks: ["Re-solve 15 Mixed LC Medium/Hards"] },
+    trackC: { title: "Portfolio Polish", tasks: ["Documentation & README Refactoring for all 15 projects"] },
+    systemDesign: "Capstone: Design a Low-Latency Hedge Fund Data Highway",
+    hours: { sat: "Final Review (8h)", sun: "Portfolio Work (8h)", mon: "Track B (3h)", tue: "Track B (3h)", wed: "SD (2h)", thu: "Mock Interview (2h)", fri: "GO TIME" }
+  }
 ];
 
 const TRACK_COLORS = {
