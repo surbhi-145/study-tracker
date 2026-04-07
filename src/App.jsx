@@ -164,14 +164,27 @@ const WEEKS = [
 ];
 
 const TRACK_COLORS = {
-    A: { bg: "bg-blue-950", badge: "bg-blue-500", text: "text-blue-300", border: "border-blue-800" },
-    B: { bg: "bg-emerald-950", badge: "bg-emerald-500", text: "text-emerald-300", border: "border-emerald-800" },
-    C: { bg: "bg-amber-950", badge: "bg-amber-500", text: "text-amber-300", border: "border-amber-800" },
+    A: { 
+        bg: "bg-blue-50 dark:bg-blue-950", 
+        badge: "bg-blue-500", 
+        text: "text-blue-700 dark:text-blue-300", 
+        border: "border-blue-200 dark:border-blue-800" 
+    },
+    B: { 
+        bg: "bg-emerald-50 dark:bg-emerald-950", 
+        badge: "bg-emerald-500", 
+        text: "text-emerald-700 dark:text-emerald-300", 
+        border: "border-emerald-200 dark:border-emerald-800" 
+    },
+    C: { 
+        bg: "bg-amber-50 dark:bg-amber-950", 
+        badge: "bg-amber-500", 
+        text: "text-amber-700 dark:text-amber-300", 
+        border: "border-amber-200 dark:border-amber-800" 
+    },
 };
 
 const DAYS = ["sat", "sun", "mon", "tue", "wed", "thu", "fri"];
-const DAY_LABELS = { sat: "Sat", sun: "Sun", mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri" };
-
 function useStorage() {
     const [data, setData] = useState({});
     const [loaded, setLoaded] = useState(false);
@@ -180,19 +193,13 @@ function useStorage() {
         try {
             const result = localStorage.getItem("tracker-state");
             if (result) setData(JSON.parse(result));
-        } catch (e) {
-            console.error("Failed to load data", e);
-        }
+        } catch (e) { console.error("Load failed", e); }
         setLoaded(true);
     }, []);
 
     function save(newData) {
         setData(newData);
-        try {
-            localStorage.setItem("tracker-state", JSON.stringify(newData));
-        } catch (e) {
-            console.error("Failed to save data", e);
-        }
+        localStorage.setItem("tracker-state", JSON.stringify(newData));
     }
 
     return { data, save, loaded };
@@ -202,16 +209,16 @@ function CheckItem({ id, label, checked, onToggle }) {
     return (
         <button
             onClick={() => onToggle(id)}
-            className={`flex items-start gap-2 w-full text-left py-2 px-3 rounded-lg transition-all duration-200 hover:bg-white/5 group`}
+            className="flex items-start gap-2 w-full text-left py-2 px-3 rounded-lg transition-all hover:bg-black/5 dark:hover:bg-white/5 group"
         >
-            <div className={`mt-0.5 w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${checked ? "bg-indigo-500 border-indigo-500" : "border-gray-600 group-hover:border-gray-400"}`}>
+            <div className={`mt-0.5 w-5 h-5 rounded border flex-shrink-0 flex items-center justify-center transition-all ${checked ? "bg-indigo-500 border-indigo-500" : "border-gray-300 dark:border-gray-600 group-hover:border-indigo-400"}`}>
                 {checked && (
                     <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 )}
             </div>
-            <span className={`text-[14px] leading-snug transition-all duration-200 ${checked ? "line-through text-gray-600" : "text-gray-300"}`}>{label}</span>
+            <span className={`text-[14px] leading-snug transition-all ${checked ? "line-through text-gray-400 dark:text-gray-600" : "text-gray-700 dark:text-gray-300"}`}>{label}</span>
         </button>
     );
 }
@@ -225,28 +232,20 @@ function TrackCard({ week, track, data: trackData, storageData, onToggle, label 
     const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
 
     return (
-        <div className={`rounded-xl border ${colors.border} ${colors.bg} bg-opacity-30 p-4 shadow-sm`}>
+        <div className={`rounded-xl border ${colors.border} ${colors.bg} bg-opacity-40 dark:bg-opacity-30 p-4 shadow-sm transition-colors`}>
             <div className="flex items-center gap-2 mb-3">
-                <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md ${colors.badge} text-gray-900`}>{label}</span>
-                {total > 0 && (
-                    <span className="ml-auto text-xs text-gray-500 font-mono">{completedCount}/{total}</span>
-                )}
+                <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-md ${colors.badge} text-white`}>{label}</span>
+                <span className="ml-auto text-xs text-gray-500 font-mono">{completedCount}/{total}</span>
             </div>
-            <p className="text-sm font-bold text-white mb-4 leading-tight">{trackData.title}</p>
+            <p className="text-sm font-bold text-gray-900 dark:text-white mb-4 leading-tight">{trackData.title}</p>
             {total > 0 && (
                 <>
-                    <div className="w-full h-1 bg-gray-900 rounded-full mb-4">
+                    <div className="w-full h-1 bg-gray-200 dark:bg-gray-900 rounded-full mb-4">
                         <div className={`h-1 rounded-full transition-all duration-700 ${colors.badge}`} style={{ width: `${pct}%` }} />
                     </div>
                     <div className="space-y-1">
                         {trackData.tasks.map((task, i) => (
-                            <CheckItem
-                                key={i}
-                                id={`w${week}-t${track}-${i}`}
-                                label={task}
-                                checked={!!storageData[`w${week}-t${track}-${i}`]}
-                                onToggle={onToggle}
-                            />
+                            <CheckItem key={i} id={`w${week}-t${track}-${i}`} label={task} checked={!!storageData[`w${week}-t${track}-${i}`]} onToggle={onToggle} />
                         ))}
                     </div>
                 </>
@@ -263,89 +262,52 @@ export default function StudyTracker() {
     const weekData = WEEKS[activeWeek - 1];
 
     function toggleItem(id) {
-        const newData = { ...data, [id]: !data[id] };
-        save(newData);
+        save({ ...data, [id]: !data[id] });
     }
 
     function getWeekProgress(weekNum) {
         const w = WEEKS[weekNum - 1];
-        const allTasks = [
-            ...w.trackA.tasks.map((_, i) => `w${weekNum}-tA-${i}`),
-            ...w.trackB.tasks.map((_, i) => `w${weekNum}-tB-${i}`),
-            ...w.trackC.tasks.map((_, i) => `w${weekNum}-tC-${i}`),
-        ];
-        if (!allTasks.length) return 0;
-        const done = allTasks.filter(id => data[id]).length;
-        return Math.round((done / allTasks.length) * 100);
+        const ids = [...w.trackA.tasks.map((_, i) => `w${weekNum}-tA-${i}`), ...w.trackB.tasks.map((_, i) => `w${weekNum}-tB-${i}`), ...w.trackC.tasks.map((_, i) => `w${weekNum}-tC-${i}`)];
+        if (!ids.length) return 0;
+        return Math.round((ids.filter(id => data[id]).length / ids.length) * 100);
     }
 
-    function getTotalProgress() {
+    const totalPct = (() => {
         let total = 0, done = 0;
-        WEEKS.forEach((w, wi) => {
-            const weekNum = wi + 1;
-            const ids = [
-                ...w.trackA.tasks.map((_, i) => `w${weekNum}-tA-${i}`),
-                ...w.trackB.tasks.map((_, i) => `w${weekNum}-tB-${i}`),
-                ...w.trackC.tasks.map((_, i) => `w${weekNum}-tC-${i}`),
-            ];
-            total += ids.length;
-            done += ids.filter(id => data[id]).length;
+        WEEKS.forEach((w, i) => {
+            const ids = [...w.trackA.tasks.map((_, j) => `w${i+1}-tA-${j}`), ...w.trackB.tasks.map((_, j) => `w${i+1}-tB-${j}`), ...w.trackC.tasks.map((_, j) => `w${i+1}-tC-${j}`)];
+            total += ids.length; done += ids.filter(id => data[id]).length;
         });
         return total > 0 ? Math.round((done / total) * 100) : 0;
-    }
-
-    const totalPct = getTotalProgress();
-    const weekPct = getWeekProgress(activeWeek);
+    })();
 
     const exportJournal = () => {
-    // Check if we actually have data
-    if (!data || Object.keys(data).length === 0) {
-        alert("No data found to export.");
-        return;
-    }
+        const journalEntries = WEEKS.map(w => {
+            const entry = data[`w${w.week}-journal`];
+            return entry?.trim() ? `## Week ${w.week}: ${w.trackA.title}\n\n${entry}\n\n---` : null;
+        }).filter(Boolean).join("\n\n");
+        if (!journalEntries) return alert("Journals are empty!");
+        const blob = new Blob([`# Surbhi's Study Journal\n\n${journalEntries}`], { type: "text/markdown" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `surbhi-study-log.md`;
+        link.click();
+    };
 
-    // Filter through WEEKS to find entries
-    const journalEntries = WEEKS.map(w => {
-        const entry = data[`w${w.week}-journal`];
-        if (!entry || entry.trim() === "") return null;
-        return `## Week ${w.week}: ${w.trackA.title}\n\n${entry}\n\n---`;
-    }).filter(Boolean).join("\n\n");
-
-    if (!journalEntries) {
-        alert("Your journals are currently empty. Write something in the Journal tab first!");
-        return;
-    }
-
-    const fullContent = `# Surbhi's Study Journal\nGenerated on: ${new Date().toLocaleDateString()}\n\n${journalEntries}`;
-    
-    const blob = new Blob([fullContent], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `surbhi-study-log-${new Date().toISOString().split('T')[0]}.md`;
-    
-    // Append to body, click, and remove (standard JS download trigger)
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-};
-
-    if (!loaded) return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-gray-500">Booting...</div>;
+    if (!loaded) return <div className="min-h-screen bg-white dark:bg-gray-950 flex items-center justify-center text-gray-500 font-mono">BOOTING_SYSTEM...</div>;
 
     return (
-        <div className="min-h-screen bg-gray-950 text-white pb-24" style={{ fontFamily: "'DM Mono', monospace" }}>
+        <div className="min-h-screen transition-colors duration-300 bg-white dark:bg-gray-950 text-gray-900 dark:text-white pb-24" style={{ fontFamily: "'DM Mono', monospace" }}>
             
-            {/* STICKY HEADER */}
-            <header className="sticky top-0 z-30 bg-gray-950/80 backdrop-blur-lg border-b border-gray-800 px-4 py-4">
+            <header className="sticky top-0 z-30 bg-white/80 dark:bg-gray-950/80 backdrop-blur-lg border-b border-gray-200 dark:border-gray-800 px-4 py-4">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <div>
                         <h1 className="text-md font-bold tracking-tighter">STUDY_LOG.v1</h1>
-                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Target: Senior SRE / NetDev</p>
+                        <p className="text-[10px] text-gray-500 uppercase tracking-widest">Target: Senior SRE</p>
                     </div>
                     <div className="text-right">
-                        <div className="text-[10px] text-indigo-400 font-bold uppercase mb-1">{totalPct}% OVERALL</div>
-                        <div className="w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase mb-1">{totalPct}% OVERALL</div>
+                        <div className="w-24 h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
                             <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${totalPct}%` }} />
                         </div>
                     </div>
@@ -354,10 +316,9 @@ export default function StudyTracker() {
 
             <div className="max-w-4xl mx-auto px-4 mt-6">
                 
-                {/* HORIZONTAL WEEK SELECTOR (MOBILE FRIENDLY) */}
                 <div className="mb-8">
-                    <p className="text-[10px] text-gray-600 uppercase tracking-[0.2em] font-bold mb-3">Timeline</p>
-                    <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide no-scrollbar">
+                    <p className="text-[10px] text-gray-400 dark:text-gray-600 uppercase tracking-[0.2em] font-bold mb-3">Timeline</p>
+                    <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
                         {WEEKS.map((w, i) => {
                             const isActive = activeWeek === i + 1;
                             const isDone = getWeekProgress(i + 1) === 100;
@@ -365,52 +326,35 @@ export default function StudyTracker() {
                                 <button
                                     key={i}
                                     onClick={() => setActiveWeek(i + 1)}
-                                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center transition-all ${isActive ? "bg-indigo-600 text-white ring-2 ring-indigo-400 ring-offset-2 ring-offset-gray-950" : isDone ? "bg-emerald-950/50 text-emerald-500 border border-emerald-900" : "bg-gray-900 text-gray-500 border border-gray-800"}`}
+                                    className={`flex-shrink-0 w-12 h-12 rounded-xl flex flex-col items-center justify-center transition-all ${isActive ? "bg-indigo-600 text-white ring-2 ring-indigo-400 ring-offset-2 dark:ring-offset-gray-950" : isDone ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-500 border border-emerald-200 dark:border-emerald-900" : "bg-gray-100 dark:bg-gray-900 text-gray-500 border border-gray-200 dark:border-gray-800"}`}
                                 >
                                     <span className="text-[10px] font-bold">W{i + 1}</span>
-                                    {w.paper && <div className="w-1 h-1 bg-purple-400 rounded-full mt-1"></div>}
+                                    {w.paper && <div className="w-1 h-1 bg-purple-500 rounded-full mt-1"></div>}
                                 </button>
                             );
                         })}
                     </div>
                 </div>
 
-                {/* WEEK SPECIFIC HEADER (ONLY ON TASKS/SCHEDULE/JOURNAL) */}
-                {activeTab !== "overview" && activeTab !== "library" && (
-                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                {activeTab !== "overview" && (
+                    <div className="mb-8 animate-in fade-in slide-in-from-bottom-2">
                         <div className="flex items-end justify-between mb-2">
-                            <h2 className="text-3xl font-black italic tracking-tighter">WEEK_{activeWeek}</h2>
-                            <span className="text-sm font-mono text-indigo-400 font-bold">{weekPct}%</span>
+                            <h2 className="text-3xl font-black italic tracking-tighter">WEEK {activeWeek}</h2>
+                            <span className="text-sm font-mono text-indigo-600 dark:text-indigo-400 font-bold">{getWeekProgress(activeWeek)}%</span>
                         </div>
-                        <div className="w-full h-2 bg-gray-900 rounded-full overflow-hidden">
-                            <div className="h-full bg-indigo-500 transition-all duration-700" style={{ width: `${weekPct}%` }} />
-                        </div>
-                        
-                        <div className="flex flex-wrap gap-2 mt-4">
-                            {weekData.paper && (
-                                <a href={weekData.paper.url} target="_blank" className="text-[10px] bg-purple-950 border border-purple-800 text-purple-300 px-3 py-1 rounded-full uppercase font-bold">📄 {weekData.paper.title}</a>
-                            )}
-                            {weekData.systemDesign && (
-                                <span className="text-[10px] bg-rose-950 border border-rose-800 text-rose-300 px-3 py-1 rounded-full uppercase font-bold">🏗 {weekData.systemDesign}</span>
-                            )}
+                        <div className="w-full h-2 bg-gray-100 dark:bg-gray-900 rounded-full overflow-hidden">
+                            <div className="h-full bg-indigo-500 transition-all duration-700" style={{ width: `${getWeekProgress(activeWeek)}%` }} />
                         </div>
                     </div>
                 )}
 
-                {/* TAB NAVIGATION */}
-                <nav className="flex gap-1 mb-8 border-b border-gray-900 overflow-x-auto no-scrollbar">
-                    {["tasks", "schedule", "journal", "overview", "library"].map(tab => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all border-b-2 -mb-px whitespace-nowrap ${activeTab === tab ? "border-indigo-500 text-white" : "border-transparent text-gray-600"}`}
-                        >
-                            {tab}
-                        </button>
+                <nav className="flex gap-1 mb-8 border-b border-gray-200 dark:border-gray-900 overflow-x-auto no-scrollbar">
+                    {["tasks", "schedule", "journal"].map(tab => (
+                        <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-3 text-[11px] font-black uppercase tracking-widest transition-all border-b-2 -mb-px ${activeTab === tab ? "border-indigo-500 text-indigo-600 dark:text-white" : "border-transparent text-gray-400"}`}>{tab}</button>
                     ))}
+                    <button onClick={exportJournal} className="ml-auto px-4 py-3 text-[11px] font-black uppercase tracking-widest text-purple-500">Export</button>
                 </nav>
 
-                {/* TAB CONTENT */}
                 <main className="min-h-[400px]">
                     {activeTab === "tasks" && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -423,75 +367,73 @@ export default function StudyTracker() {
                     {activeTab === "schedule" && (
                         <div className="space-y-3">
                             {DAYS.map(day => (
-                                <div key={day} className="bg-gray-900/50 border border-gray-800 rounded-xl p-4 flex gap-4">
-                                    <div className="w-12 text-center border-r border-gray-800 pr-4">
-                                        <div className="text-xs font-black text-indigo-500 uppercase">{day}</div>
+                                <div key={day} className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-xl p-4 flex gap-4">
+                                    <div className="w-12 text-center border-r border-gray-200 dark:border-gray-800 pr-4">
+                                        <div className="text-xs font-black text-indigo-600 dark:text-indigo-500 uppercase">{day}</div>
                                     </div>
-                                    <div className="text-sm text-gray-300 italic">{weekData.hours[day]}</div>
+                                    <div className="text-sm text-gray-600 dark:text-gray-300 italic">{weekData.hours[day]}</div>
                                 </div>
                             ))}
                         </div>
                     )}
 
                     {activeTab === "journal" && (
-    <div className="space-y-4">
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+    <div className="space-y-4 animate-in fade-in duration-500">
+        <div className="flex items-center justify-between px-1">
+            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Log Mode</p>
+            <div className="flex gap-2">
+                {['terminal', 'feynman'].map(mode => (
+                    <button 
+                        key={mode}
+                        onClick={() => save({ ...data, journalMode: mode })}
+                        className={`text-[9px] uppercase px-2 py-1 rounded border transition-all ${
+                            (data.journalMode || 'terminal') === mode 
+                            ? "bg-indigo-600 border-indigo-500 text-white" 
+                            : "bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400"
+                        }`}
+                    >
+                        {mode}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 relative transition-all">
+            {/* Contextual Header */}
+            <div className="absolute top-3 left-6 text-[10px] font-bold text-indigo-500/50 uppercase tracking-widest font-mono">
+                {data.journalMode === 'feynman' 
+                    ? `feynman_engine --explain --week=${activeWeek}`
+                    : `surbhi@terminal:~/week-${activeWeek}$ log_entry.sh`
+                }
+            </div>
+            
             <textarea
                 value={data[`w${activeWeek}-journal`] || ""}
                 onChange={(e) => save({ ...data, [`w${activeWeek}-journal`]: e.target.value })}
-                placeholder="Reflections: What worked? What's blocking you?..."
-                className="w-full h-80 bg-transparent text-gray-300 text-sm leading-relaxed focus:outline-none resize-none"
+                className="w-full h-80 bg-transparent text-gray-900 dark:text-white outline-none resize-none pt-8 font-mono text-sm leading-relaxed"
+                placeholder={
+                    data.journalMode === 'feynman'
+                    ? "Explain this week's core concept as if you're teaching a Junior SRE. Identify the gaps in your own understanding as you write..."
+                    : (activeWeek <= 4 ? ">> LOG: BGP/OSPF convergence issues or RFC notes..." :
+                       activeWeek <= 8 ? ">> LOG: Linux kernel hooks, eBPF XDP counter results..." :
+                       ">> LOG: System architecture trade-offs and bottleneck analysis...")
+                }
             />
-            <p className="text-[10px] text-gray-600 text-right mt-4 uppercase font-bold tracking-widest">
-                Auto-saved to LocalStorage
-            </p>
         </div>
         
-        {/* The Export Button */}
-        <button 
-            onClick={exportJournal}
-            className="w-full py-4 bg-indigo-600/10 border border-indigo-500/50 rounded-xl text-indigo-400 text-xs font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all"
-        >
-            📥 Export All Journal Notes (.md)
-        </button>
+        <div className="flex justify-between items-center px-2">
+            <span className="text-[9px] text-gray-400 font-mono italic">
+                * {data.journalMode === 'feynman' ? "Focus on clarity and mental models." : "Focus on technical specs and commands."}
+            </span>
+            <button 
+                onClick={exportJournal}
+                className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+                GENERATE_MD_BACKUP
+            </button>
+        </div>
     </div>
 )}
-
-                    {activeTab === "overview" && (
-                        <div className="grid grid-cols-1 gap-3">
-                            {WEEKS.map(w => (
-                                <div 
-                                    key={w.week} 
-                                    onClick={() => { setActiveWeek(w.week); setActiveTab("tasks"); window.scrollTo(0,0); }}
-                                    className={`p-4 rounded-xl border transition-all cursor-pointer ${activeWeek === w.week ? "bg-indigo-900/20 border-indigo-500" : "bg-gray-900/40 border-gray-800"}`}
-                                >
-                                    <div className="flex justify-between items-center mb-2">
-                                        <span className="text-[10px] font-black text-gray-600 uppercase">WEEK {w.week}</span>
-                                        <div className="flex gap-1">
-                                            {w.paper && <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>}
-                                            {w.blog && <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div>}
-                                        </div>
-                                    </div>
-                                    <p className="text-sm font-bold text-gray-200">{w.trackA.title}</p>
-                                    <p className="text-xs text-gray-500 mt-1">{w.trackB.title}</p>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {activeTab === "library" && (
-                        <div className="space-y-6">
-                            <div className="space-y-3">
-                                <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-widest">RFCs & Research Papers</h3>
-                                {WEEKS.filter(w => w.paper).map((w, i) => (
-                                    <a key={i} href={w.paper.url} target="_blank" className="block p-4 bg-gray-900 border border-gray-800 rounded-xl hover:border-purple-500 transition-colors">
-                                        <p className="text-sm font-bold text-white mb-1">{w.paper.title}</p>
-                                        <p className="text-[10px] text-purple-400 font-bold uppercase">Referenced in Week {w.week}</p>
-                                    </a>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </main>
             </div>
         </div>

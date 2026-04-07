@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite' // 1. Import it
 
 export default defineConfig({
+  darkMode: 'media',
   plugins: [
     react(),
     tailwindcss(), // 2. Add it here
